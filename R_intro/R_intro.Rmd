@@ -1,0 +1,176 @@
+---
+title: "Introduction to R"
+subtitle: "Sensory and Genomics Data Analysis workshop"
+author: "Dr. Ido Bar"
+date: "17/04/2024"
+output: 
+    bookdown::html_document2:
+#      css: "style/style.css"
+      toc: true
+      toc_float: 
+        collapsed: yes
+      toc_depth: 3
+      highlight: pygments
+      number_sections: false
+      code_folding: show
+---
+
+```{r setup, include=FALSE}
+packages <- c("htmltools", "knitr", "tidyverse", "here",
+              "fontawesome", "gadenbuie/tweetrmd",
+                  "hadley/emo")
+pak::pak(packages, ask=FALSE)
+here::i_am("R_intro/R_intro.Rmd")
+
+pacman::p_load(char = basename(packages), install = FALSE)
+
+# pacman::p_load_gh("mitchelloharawild/icons", update = FALSE)
+knitr::opts_chunk$set(echo = TRUE, fig.align='center')
+```
+
+```{js logo-js, echo=FALSE}
+$(document).ready(function() {
+  $('#header').parent().prepend('<div id=\"Griffith logo\"><img src=\"https://www.griffith.edu.au/__data/assets/image/0018/653121/Griffith_Full_Logo_scaled.png\" style=\"position:absolute; top:50px; right:0; padding:20px; height:120px\"></div>');
+  $('#header').css('margin-right', '120px')
+});
+```
+
+# Intorduction
+This document contains the training material and references for the Sensory and Genomics Data Analysis Workshop delivered by partners in the **Genetics of Fruit Sensory Preferences** Hort Innovation project (AS19003), led by [Heather Smyth](mailto:h.smyth@uq.edu.au) (QAAFI, UQ), [Natalie Dillon](mailto:natalie.dillon@daf.qld.gov.au) (QDAF) and [Ido Bar](mailto:i.bar@griffith.edu.au) (Griffith University).   
+It is designed for students and researchers who wish to learn how to analyse, visualise and combine sensory and genetic/genomic datasets.
+
+## Instructions
+
+The following tutorial will let you reproduce the analyses that we are going to perform at the workshop using R.  
+Please read carefully and follow the steps. Wherever you see the <kbd>Code</kbd> icon on the right you can click on it to see the actual code used in that section (see a simple example below this paragraph). 
+
+```{r code_example, eval=TRUE}
+print("Hello World!")
+```
+
+You are more than welcome to try coding in real-time during the workshop, but if you're lost or getting errors, please don't hesitate to copy-paste the code into your script. If you want the extra challenge there's also the option to hide all code blocks at the very top right of this document.  
+Good luck!
+
+## `r  fa("r-project", fill = "#384CB7")`
+
+R is a programming language and free software environment for statistical computing and graphics supported by the R Foundation for Statistical Computing (see the [R homepage](https://www.r-project.org/){target="_blank"}). The R language is widely used among statisticians and data miners for developing statistical software and data analysis. R can be installed from the Comprehensive R Archive Network (CRAN) via **[this link](https://cloud.r-project.org/){target="_blank"}** (choose the appropriate download for your operating system) or you can choose the R distribution offered by Microsoft (R Open), which is based on a slightly older R version, but offers additional capabilities for performance, reproducibility and platform support (**[download link](https://mran.microsoft.com/download){target="_blank"}**).
+
+#### Install R on MacOS
+<iframe width="560" height="315" src="https://www.youtube.com/embed/AEebOXiMyyI" data-external= "1" title="Install R on MacOS tutorial" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+
+#### Install R on Windows
+<iframe width="560" height="315" src="https://www.youtube.com/embed/rHZ9MGWxU5I" data-external= "1" title="Install R on Windows tutorial" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+
+Windows users should also install **[Rtools](https://cran.r-project.org/bin/windows/Rtools/){target="_blank"}** to be able to compile and install packages from source code (a requirement for some packages).  
+*Make sure that the version of Rtools match the version of R you have installed*
+
+### RStudio
+
+RStudio is an integrated development environment (IDE) with a set of integrated tools designed to help you be more productive with R. It includes a console, syntax-highlighting editor that supports direct code execution, and a variety of robust tools for plotting, viewing history, debugging and managing your workspace. It requires R to be installed prior to be able to send commands to the interpreter.
+
+### Installing R and RStudio locally
+Both R and RStudio can be installed locally on any operating system (`r  fa("apple")`, `r  fa("windows",  fill ="#5599FF")`, or `r  fa("linux")`, see a [detailed tutorial](https://www.datacamp.com/community/tutorials/installing-R-windows-mac-ubuntu%20){target="_blank"}), which provides complete control over the installation and allows you to install additional  packages and used anywhere without requiring internet connection. This is recommended for anyone who is planning to do any future analysis in R.
+
+#### Project Management with RStudio
+
+We recommend to interact with R through the RStudio integrated development environment (IDE), which let's us easily write our code, test it, see our files, objects in memory and plots that we produce. If we run the analysis locally, it is highly recommended to use RStudio's built-in Projects to contain our analysis in its own folder with all the files required. That will also help in reading data files and writing results and figures back to the hard drive.   
+
+>1. Start RStudio by clicking on its icon.  
+2. Start a new project by selecting "File --> New Project" or clicking on the "New Project" icon (under "Edit" in the taskbar).  
+3. Select "New Directory --> New Project" and then enter "Workshop1" in the Directory name text box and browse to the "workspace" folder to create the project folder in (see screenshots A-D in Figure \@ref(fig:rstudio-proj) below)
+ 
+```{r rstudio-proj, echo=FALSE, fig.cap="Create a new project in RStudio screenshots.", out.width = '100%'}
+knitr::include_graphics(here("figs", "RStudio_create_project.png"))
+```
+
+>4. Create a new R script file by selecting "File --> New File --> R Script" or clicking on the "New File" icon (under the "File" in the taskbar)   
+5. Save the script file by select "File --> Save" or pressing <kbd>Ctrl</kbd>+<kbd>s</kbd> or clicking on the floppy disk icon on the top bar  
+
+
+### Install Packages
+R can be extended with additional functionality by installing external packages (usually hosted at the Comprehensive R Archive Network repository -- [CRAN](https://cran.r-project.org/web/packages/index.html){target="_blank"}). To find which packages can be useful for your type analysis, use your favourite search engine (Google is your friend) and the available [Task Views on CRAN](https://cran.r-project.org/web/views/){target="_blank"}, which provide some guidance which packages on CRAN are relevant for tasks related to a certain topic.  
+For our current analysis we will use some packages from the [tidyverse](https://www.tidyverse.org/){target="_blank"} -- a suite of packages designed to assist in data analysis, from reading data from multiple source (`readr`, `readxl` packages), through data wrangling and cleanup (such as `dplyr`, `tidyr`) and finally visualisation (`ggplot2`), as can be seen in Figure \@ref(fig:tidyverse-wf).  
+_if tidyverse is failing to install then try [bplyr](https://github.com/yonicd/bplyr){target="_blank"} or [poorman](https://nathaneastwood.github.io/poorman){target="_blank"} packages_
+
+```{r tidyverse-wf, echo=FALSE, fig.cap="An example of a data analysis workflow using packages from the Tidyverse (credit to [The Centre for Statistics in Ecology, the Environment and Conservation, University of Cape Town](http://www.seec.uct.ac.za/r-tidyverse)).", out.width = '80%'}
+knitr::include_graphics(here("figs", "tidy_workflow.png"))
+```
+
+To install these packages, we use the `install.packages('package')` command, please note that the package name need to be quoted and that we only need to be perform it once, or when we want or need to update the package.  Once the package was installed, we can load its functions using the `library(package)` command. _Note that in this case we use the package name without quotes!_.  
+Installing new packages in R can sometimes be quite challenging and time-consuming using the general approach described above, however, I recently found a package called [pak](https://pak.r-lib.org/){target="_blank"}, which makes installing other packages a breeze, so we will use it throughout these workshops.
+
+
+```{r install_packages, eval=FALSE}
+# install required packages - needed only once! (comment with a # after first use)
+install.packages("pak")
+# load the package
+library(pak)
+pak("tidyverse")  
+library(tidyverse)
+
+```
+
+Now we have R and RStudio set up and ready to read in data and do some analysis!
+
+
+## Additional Resources
+
+
+### Using R and RStudio from Cloud services
+If we want to keep things simple (for this workshop for example) or we would like to use R on shared computers, where we can't install software, we can run R and Rstudio through a web client that is hosted on a remote server.  
+We will use the [Binder](https://mybinder.org/){target="_blank"} service, which is free, easy to use and can be launched from a single GitHub repository (more about this in the workshop).  
+R and RStudio can also be run on [EcoCloud](https://ecocloud.org.au/){target="_blank"}, another cloud-based service free for researchers and oriented at ecology modeling and integration of external databases; or at [Rstudio.cloud](https://rstudio.cloud){target="_blank"}, which has a tiered subscription-based access (see [plans](https://rstudio.cloud/plans/compare){target="_blank"})
+
+#### Running R and RStudio on Binder
+Using Binder is as simple as clicking on the Binder badge - [![Launch Rstudio Binder](../figs/binder_logo.png){width=125px}](https://mybinder.org/v2/gh/IdoBar/Sensory_Genetics_training_binder/main?urlpath=rstudio){target="_blank"}.  
+Alternatively, you can navigate to the [Binder](https://mybinder.org/){target="_blank"} homepage and enter the URL of this tutorial's [GitHub repository](https://github.com/IdoBar/Sensory_Genetics_training_binder.git){target="_blank"} `https://github.com/IdoBar/Sensory_Genetics_training_binder.git` and click on the **launch** button (see screenshot in Figure \@ref(fig:binder) below).
+ 
+```{r binder, echo=FALSE, fig.cap="Binder launch screenshot.", out.width = '100%'}
+knitr::include_graphics(here("figs",  "Screenshot_The_Binder_Project.png"))
+```
+
+Now be patient while the environment is loading...  
+You should now see in your web browser an RStudio interface (if you got to the Jupyter page, click on new --> RStudio) and are ready to start working in R in "The Cloud"! `r  fa("cloud", fill ="#5599FF")``r  fa("cloud", fill ="#5599FF")``r  fa("cloud", fill ="#5599FF")`
+
+##### Downloading files from Binder
+After we've finished working on Binder we would like to download the R script that we wrote and any output files (summary tables and figures). We can access those files by using the `files` tab in RStudio (bottom right pane).  
+Select the files/folders that you would like to download and click on `r  fa("cog", fill ="#4383A4")` More `r fa("long-arrow-alt-right")` Export... (see screenshot in Figure \@ref(fig:binder-export) below) to save the file on your computer.  
+
+```{r binder-export, echo=FALSE, fig.cap="Download files from Binder/RStudio screenshot.", out.width = '75%'}
+knitr::include_graphics(here("figs", "Rstudio_export_screenshot.png"))
+```
+
+
+### Online Books, Tutorials and Courses
+
+* **Introduction to R** -- [online notes](https://monashdatafluency.github.io/r-intro-2/index.html){target="_blank"} of a course taught by Monash Bioinformatics Platform 
+* **Awesome R** -- A curated list of awesome R packages and tools, see the [GitHub repository](https://github.com/qinwf/awesome-R){target="_blank"}
+* **YaRrr! The Pirate’s Guide to R** -- Yet another great introductory [online book on R](https://bookdown.org/ndphillips/YaRrr/){target="_blank"}
+* **What They Forgot to tell you about R** -- Tips and best practices for working in R ([R WTF](https://rstats.wtf/){target="_blank"})  
+* **R for Reproducible Scientific Analysis: A Software Carpentry course** -- <https://swcarpentry.github.io/r-novice-gapminder/> (offered regularly here at GU, follow [\@hackyhourGU](https://twitter.com/hackyhourGU){target="_blank"} on Twitter)  
+
+### AI-helpers
+
+* **gptstudio** -- An RStudio addin to help writing code, comments, spell and syntax-check and more [link](https://michelnivard.github.io/gptstudio/){target="_blank"}  
+* **rtutor.ai** -- Chat with your data to visualise it (and learn how to write the R code for it!) [link](http://rtutor.ai/){target="_blank"}  
+
+### Visualisation 
+* **Fundamentals of Data Visualization** -- a guide to making visualizations that accurately reflect the data, tell a story, and look professional [link](https://clauswilke.com/dataviz/){target="_blank"}
+* **From Data to Viz** leads you to the most appropriate graph for your data -- https://www.data-to-viz.com/ (check also [Dataviz Inspirations](https://www.dataviz-inspiration.com/){target="_blank"})  
+* **Coding Club** -- A Positive Peer-Learning Community (ecology and environmental science students and researchers from the University of Edinburgh), [link](https://ourcodingclub.github.io/){target="_blank"} (I run our very own Coding Club here at Griffith, ask me if you want to join)
+* **Beautiful plotting in R: A ggplot2 cheatsheet** provides lots of recipes and easy fixes for common tasks when creating `ggplot2` plots [link](http://zevross.com/blog/2014/08/04/beautiful-plotting-in-r-a-ggplot2-cheatsheet-3/){target="_blank"}   
+* **Plot anything with ggplot2** -- [YouTube workshops](https://www.youtube.com/watch?v=h29g21z0a68){target="_blank"} 
+* Useful cheatsheets can be found on the [RStudio Cheatsheets website](https://rstudio.com/resources/cheatsheets/){target="_blank"} (start with the most useful/basic ones relevant to this course: RStudio IDE, Data Import, Data Transformation and Data Visualization)  
+* **paletteer** -- An R package ([GitHub repo](https://github.com/EmilHvitfeldt/paletteer){target="_blank"}) that lets you choose colour palettes from a huge range of available packages (see examples of available palettes [here](https://github.com/EmilHvitfeldt/r-color-palettes){target="_blank"} and you can even use [TV-themed palettes](https://github.com/Ryo-N7/tvthemes){target="_blank"}) 
+
+```{r bluey-tweet}
+tweetrmd::tweet_embed("https://twitter.com/DrIdoBar/status/1272919164252897286")
+```
+
+How good was that? Who needs Excel anyway `r emo::ji("wink")`?
+```{r R-excel-meme}
+tweetrmd::tweet_embed("https://twitter.com/IsabelCabreraR/status/1503407817583067139")
+```
+
+Please contact me at i.bar@griffith.edu.au if you have any questions or comments.
+

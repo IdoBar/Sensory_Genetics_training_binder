@@ -1,0 +1,239 @@
+---
+title: "Predictive Sensory Modelling"
+subtitle: "Sensory and Genomics Data Analysis workshop"
+author: "Joshua Lomax"
+date: "17/04/2024"
+output: 
+    bookdown::html_document2:
+#      css: "style/style.css"
+      toc: true
+      toc_float: 
+        collapsed: yes
+      toc_depth: 3
+      highlight: pygments
+      number_sections: false
+      code_folding: show
+---
+
+```{r setup, include=FALSE}
+packages <- c("htmltools", "knitr", "tidyverse", "here",
+              "fontawesome", "gadenbuie/tweetrmd",
+                "janitor", "rMVP", "CMplot")
+pak::pak(packages, ask=FALSE)
+here::i_am("Predictive_modelling/Predictive_modelling.Rmd")
+
+pacman::p_load(char = basename(packages), install = FALSE)
+
+# pacman::p_load_gh("mitchelloharawild/icons", update = FALSE)
+knitr::opts_chunk$set(echo = TRUE, fig.align='center')
+```
+
+```{js logo-js, echo=FALSE}
+$(document).ready(function() {
+  $('#header').parent().prepend('<div id=\"Griffith logo\"><img src=\"https://www.griffith.edu.au/__data/assets/image/0018/653121/Griffith_Full_Logo_scaled.png\" style=\"position:absolute; top:50px; right:0; padding:20px; height:120px\"></div>');
+  $('#header').css('margin-right', '120px')
+});
+```
+
+# Intorduction
+This lesson will focus on modelling of sensory data, as part of the Sensory and Genomics Data Analysis Workshop.  We will use papaya and tomato sensory data as examples.
+
+
+## Introduction to Feature Engineering
+**Some things to consider**
+
+  - There's no such thing as a perfect model
+  - Using many features or variables can lead to over-fitting
+  - Feature engineering can improve the model efficiency and accuracy
+
+```{r feature-engineering-lifecycle, echo=FALSE, fig.cap="Feature engineering lifecycle (credit to [Domino.ai](https://domino.ai/data-science-dictionary/feature-engineering)).", out.width = '80%'}
+# knitr::include_graphics(here("figs", "feature_engineering.png"))
+knitr::include_graphics("https://cdn.sanity.io/images/kuana2sp/production-main/7b91c1015748142a4f43f9767ae44feb8905ad55-739x349.webp")
+```
+
+Feature engineering involves transforming raw data into a format that enhances the performance of machine learning models. The key steps in feature engineering include:
+
+* **Data Exploration and Understanding**: Explore and understand the dataset, including the types of features (measured variables/traits) and their distributions. Understanding the shape of the data is key.  
+* **Handling Missing Data**: Address missing values through imputation or removal of instances or features with missing data. There are many algorithmic approaches to handling missing data.  
+* **Variable Encoding**: Convert categorical variables into a numerical format suitable for machine learning algorithms using methods.  
+* **Feature Scaling and Normalisation**: Standardise or normalise numerical features to ensure they are on a similar scale, improving model performance.  
+* **Feature Creation**: Generate new features (such as BLUPs) by combining existing ones to capture relationships between variables.  
+* **Handling Outliers**: Identify and address outliers in the data through techniques like trimming or transforming the data.  
+* **Binning or Discretisation**: Convert continuous features into discrete bins to capture specific patterns in certain ranges.  
+* **Text Data Processing**: If dealing with text data, perform tasks such as tokenisation, stemming, and removing stop words.  
+* **Time Series Features**: Extract relevant time-based features such as lag features or rolling statistics for time series data.  
+* **Vector Features**: Vector features are commonly used for training in machine learning. In machine learning, data is represented in the form of features, and these features are often organised into vectors. A vector is a mathematical object that has both magnitude and direction and can be represented as an array of numbers.  
+* **Feature Selection**: Identify and select the most relevant features to improve model interpretability and efficiency using techniques like univariate feature selection or recursive feature elimination.  
+* **Feature Extraction**: Feature extraction aims to reduce data complexity (often known as "data dimensionality") while retaining as much relevant information as possible. This helps to improve the performance and efficiency of machine learning algorithms and simplify the analysis process. Feature extraction may involve the creation of new features ("feature engineering") and data manipulation to separate and simplify the use of meaningful features from irrelevant ones. Create new features or reduce dimensionality using techniques such as Principal Component Analysis (PCA) or t-Distributed Stochastic Neighbor Embedding (t-DSNE).  
+* **Cross-validation**: selecting features prior to cross-validation can introduce significant bias. Evaluate the impact of feature engineering on model performance using cross-validation techniques.
+
+## Analysis Workflow
+### Install Required Packages
+
+For our current analysis we will use some packages from the [tidyverse](https://www.tidyverse.org/){target="_blank"} -- a suite of packages designed to assist in data analysis, from reading data from multiple source (`readr`, `readxl` packages), through data wrangling and cleanup (such as `dplyr`, `tidyr`) and finally visualisation (`ggplot2`). This will be complemented by several additional packages for visualisation and multivariate analysis, such as `corrplot`, `GGally`, `factoextra`, `FactoMineR` and `survminer`.  
+_if tidyverse is failing to install then try [bplyr](https://github.com/yonicd/bplyr){target="_blank"} or [poorman](https://nathaneastwood.github.io/poorman){target="_blank"} packages_
+
+To install these packages, we use the `install.packages('package')` command, please note that the package name need to be quoted and that we only need to be perform it once, or when we want or need to update the package.  Once the package was installed, we can load its functions using the `library(package)` command. _Note that in this case we use the package name without quotes!_.  
+Installing and loading more than a handful of packages from different sources (CRAN, GitHub, BioConductor) can become daunting and time-consuming using the general approach described above, however, with [pak](https://pak.r-lib.org/){target="_blank"} and [pacman](https://github.com/trinker/pacman){target="_blank"} we can easily install and load multiple packages in a couple lines of code, so we will use it throughout these workshops.
+
+
+```{r install_packages, eval=FALSE}
+# install pak - needed only once! (comment with a # after first use)
+install.packages("pak")
+# load the package
+library(pak)
+required_packages <- c("pacman", # load packages
+                       "tidyverse", "readxl", "reshape2", "openxlsx",  # data processing
+                       "ggrepel", "corrplot", "gridExtra", "GGally", # Plotting
+                       "factoextra", "FactoMineR", "survminer" # Multivariate Analysis)
+                        )
+# install all packages - needed only once! (comment with a # after first use)
+pak(required_packages)  
+# load all packages at once with pacman - required at the begining of every session
+pacman::p_load(char = basename(required_packages), update = FALSE)
+
+```
+
+Now we have our environment set up and ready to read in data and do some analysis!
+
+### Data Pre-processing
+The first step is to create a data matrix with all of our sensory and metabolite data. The matrix can then be normalised and missing data (`NA`s) can be imputed.
+
+``` {r preprocessing, echo = T, eval = F}
+# Extract SD1_Original_Data sheet from SD1_dataset_tomato.xlsx file
+tom_og <- read_excel("data/supplemental_datasets/SD1_dataset_tomato.xlsx", sheet = "SD1_Original_Data")
+
+# Remove columns not needed for most computation
+tom_og <- tom_og %>% select(-species, -`panel number`)
+
+# For the following metabolites, not every sample in the population has been quantified (e.g. missing data)
+mets_with_missing_data <- c("firmness",
+                            "citric",
+                            "fructose",
+                            "glucose",
+                            "sucrose",
+                            "Limonene",
+                            "Nerylacetone")
+
+# Thus, we will impute any missing data with the mean of the non-missing samples in the population
+
+# Calculate means of non-missing samples for each metabolite containing missing data
+means <- tom_og %>% 
+  select(mets_with_missing_data) %>% 
+  colMeans(na.rm = T)
+
+# For each metabolite with missing data we find which samples are NAs 
+#   and replace the NAs with the mean of the non-NA samples
+
+for(i in 1:length(mets_with_missing_data)){
+  tom_og[is.na(bb_og[, mets_with_missing_data[i]]), mets_with_missing_data[i]] <- means[i]
+}
+
+# Scale all features and responses to N(0,1)
+tom_og[,2:length(tom_og)]  <- scale(tom_og[,2:length(tom_og)])
+
+# Write new scaled/imputed data to .csv file for clean input to other scripts
+write.csv(tom_og, "./data/input/tom_imputed_scaled.csv", row.names = F)
+
+
+```
+
+### Metabolite data exploration
+
+First we might want to visualise the metabolite data using a histogram or violin plot
+
+```{r histogram, echo = T, results='hide', fig.cap = "*Distribution of metabolite concentrations for each volatile group across the tomato population. Volatile concentrations are reported in nanograms per gram fresh weight per hour (ng/gfw/h) on a log10scale.*"}
+# Load data
+#key = read_excel("data/input/Metabolites_cluster.xlsx", sheet = 1)
+key = read.csv("data/input/tom_metabolites_clusters_key.csv")
+tom = tibble(read.csv("data/input/tom_imputed.csv", check.names = F))
+
+
+# Make unique genotype ids
+tom$id <- paste(1:nrow(tom), tom$id)
+
+# Gathering names of traits and metabolites
+sensory = c("liking","sweetness", "sour", "umami", "intensity")
+mets = colnames(tom)[!colnames(tom) %in% c(sensory, "id")]
+
+# Check for the ones that don't overlap
+key$Metabolite[!key$Metabolite %in% mets]
+mets[!mets %in% key$Metabolite]
+
+# Creating a metabolite key by merging
+idx.tom = data.frame(Metabolite = mets) %>%
+  merge(., key, by="Metabolite")
+
+# Selecting only metabolite concentrations
+tmp <- tom %>% select(-all_of(sensory))
+
+# Creating the optimal data frame for plotting
+tmp2 <- data.frame(t(tmp[, -1]))
+colnames(tmp2) <- tmp$id
+tmp2$id <- rownames(data.frame(tmp2))
+
+tmp3 <- merge(tmp2, idx.tom[,c("Metabolite", "fig1b_histogram")], by.x = "id", by.y = "Metabolite", all.x = T)
+
+tmp3$fig1b_histogram <- as.factor(tmp3$fig1b_histogram)
+colnames(tmp3)[1] <- "metabolite"
+
+tmp4 <- tmp3 %>% #select(-fig1b_histogram) %>% 
+  pivot_longer(cols = c(-metabolite, -fig1b_histogram), 
+               names_to = "genotype", 
+               values_to = "concentration") %>% 
+  drop_na() %>% 
+  filter(!(fig1b_histogram %in% c("Acid/Sugar", "unknown"))) %>% 
+  filter(concentration != 0)
+
+
+# Plotting
+tmp4 %>% 
+  ggplot(., aes(x = fig1b_histogram, 
+                y = log((concentration), 10), 
+                fill = fig1b_histogram)) + 
+  geom_violin(color = "black", size = 0.5) +
+  ylab(expression(paste(log[10], bgroup("[", ng/gfw/hr, "]")))) +
+  scale_y_continuous(limits = c(-3.25, 3.25), 
+                     breaks = seq(-3, 3, by = 1)) +
+  scale_fill_manual(values = c("#9999ffff", 
+                               "#74a9ccff", 
+                               "#ffcc99ff", 
+                               "#e19582ff", 
+                               "#ccccccff")) +
+  labs(fill='Metabolite Class') +
+  theme_bw() +
+  theme(panel.grid = element_blank(),
+        axis.text.x = element_blank(),
+        axis.text.y = element_text(size = 14),
+        axis.title.x = element_blank(),
+        axis.title.y = element_text(size = 14),
+        axis.ticks.x = element_blank()) 
+
+```
+
+## Modelling 
+### Gradient Boosted Model (GBM)
+
+Gradient boosted model generates relative variable importance scores for each characteristic. It is possible to filter aroma causing compounds by aroma activity values that are based on estimates for odor threshold concentrations to reduce the number of variables. That is, only including aroma compounds with concentrations that exceed the theoretical odor threshold in at least one sample group. For gradient-boosting machines the variable importance represents the marginal effect of that chemical including the interaction effects with other chemicals. This value is scaled between 0and 100 where 0 is a not an important predictor and 100 is an important predictor.
+
+
+### Bayesian Model
+The correlation of compounds to aroma intensity can be predicted by the beta coefficient from Bayesian modelling.In BayesA, the beta coefficients indicate the individual additive effect of that chemical free of interactions. This coefficient predicts if a chemical is important for enhancing the flavor attribute (positive value) or decreasing the flavor attribute (negative value).
+
+
+
+Beta coefficients from the model are added to the table containing relative variable importance from the previous model. Finally, GBM values (x-axis) and beta-coefficients (y-axis) can be plotted to visualise the determinants of each characteristic.
+
+## Additional Resources
+
+### Online Books, Blogs and Tutorials
+
+* [Feature engineering Blog](https://domino.ai/data-science-dictionary/feature-engineering){target="_blank"}
+* [Review dealing with complex data and modelling methods](https://link.springer.com/chapter/10.1007/978-981-19-2416-3_1){target="_blank"}
+* **Principal Component Methods in R: Practical Guide** -- A fantastic [tutorial to PCA methods and visualisation](http://www.sthda.com/english/articles/31-principal-component-methods-in-r-practical-guide/){target="_blank"} in R (along with many other tutorials for statistical analyses in R)
+
+
+Please contact Josh at josh.lomax@griffithuni.edu.au if you have any questions or comments.
+
+## References
+

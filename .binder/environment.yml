@@ -1,0 +1,53 @@
+name: gwas
+channels:
+  - conda-forge
+  - bioconda
+#  - r
+dependencies:
+  - r-pak
+  - r-irkernel
+#  - r-irkernel=1.1
+#  - r-base=3.6.1
+  - r-base
+  - r-devtools
+#  - r-remotes
+  - r-tidyverse
+  - r-pacman
+  - r-shiny
+  - r-rmarkdown
+  - r-bookdown
+  - r-ggpubr
+ # - r-gtsummary
+ # - r-rcpp
+  - r-paletteer
+  - r-ggrepel
+  - r-scales
+  - r-corrplot
+  - r-reshape2
+  - r-openxlsx
+  - r-gridextra
+  - r-ggally
+  - r-factoextra
+  - r-factominer
+  - r-survminer
+#  - r-captioner
+#  - r-here
+  - r-htmltools
+  - r-agricolae
+  - r-car
+  - r-MASS
+  - r-plotly
+  - r-lubridate
+  - r-patchwork
+  - r-visdat
+  - r-pastecs
+  - r-rmisc
+  - r-esquisse
+  - r-rmvp 
+  - r-dartr 
+  - r-cmplot 
+  - r-vcfr 
+  - r-janitor
+  # - r-fontawesome
+  - pandoc
+ # - libgcc
