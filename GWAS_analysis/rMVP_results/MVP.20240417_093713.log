@@ -1,0 +1,72 @@
+====================== Welcome to MVP ======================
+      A Memory-efficient, Visualization-enhanced, and       
+             Parallel-accelerated Tool For GWAS             
+                    __  __  __   __  ___                    
+                   |  \/  | \ \ / / | _ \                   
+                   | |\/| |  \ V /  |  _/                   
+                   |_|  |_|   \_/   |_|     Version: 1.0.8  
+  Designed and Maintained by Lilin Yin, Haohao Zhang, and   
+  Xiaolei Liu                                               
+  Contributors: Zhenshuang Tang, Jingya Xu, Dong Yin,       
+  Zhiwu Zhang, Xiaohui Yuan, Mengjin Zhu, Shuhong Zhao,     
+  Xinyun Li                                                 
+  Contact: xiaoleiliu@mail.hzau.edu.cn                      
+============================================================
+Start: 2024-04-17 09:37:13 
+The log has been output to the file: rMVP_results/MVP.20240417_093713.log 
+Input data has 274 individuals, 18976 markers 
+Analyzed trait: percent_lfa 
+Number of threads used: 8 
+Deriving relationship matrix successfully 
+Eigen Decomposition on GRM 
+-------------------------GWAS Start------------------------- 
+General Linear Model (GLM) Start... 
+scanning...
+Genomic inflation factor (lambda): 1.4749 
+Writing results to local file 
+Mixed Linear Model (MLM) Start... 
+Variance components using: BRENT 
+Estimated Vg and Ve: 37.355496 159.340978 
+scanning...
+Genomic inflation factor (lambda): 0.2812 
+Writing results to local file 
+FarmCPU Start... 
+Current loop: 1 out of maximum of 10 
+seqQTN: 
+NULL 
+number of covariates in current loop is: 
+0 
+scanning... 
+Current loop: 2 out of maximum of 10 
+Optimizing Pseudo QTNs... 
+Top snps have little effect, set seqQTN to NULL! 
+Genomic inflation factor (lambda): 1.4749 
+Writing results to local file 
+Significant level: 5.27e-06 
+---------------------Visualization Start-------------------- 
+Phenotype distribution Plotting 
+SNP_Density Plotting 
+Circular_Manhattan Plotting percent_lfa.GLM 
+Circular_Manhattan Plotting percent_lfa.MLM 
+Circular_Manhattan Plotting percent_lfa.FarmCPU 
+Rectangular_Manhattan Plotting percent_lfa.GLM 
+Rectangular_Manhattan Plotting percent_lfa.MLM 
+Rectangular_Manhattan Plotting percent_lfa.FarmCPU 
+Q_Q Plotting percent_lfa.GLM 
+Q_Q Plotting percent_lfa.MLM 
+Q_Q Plotting percent_lfa.FarmCPU 
+Multracks_Rectangular Plotting percent_lfa.GLM 
+Multracks_Rectangular Plotting percent_lfa.MLM 
+Multracks_Rectangular Plotting percent_lfa.FarmCPU 
+Multracks_QQ Plotting percent_lfa.GLM 
+Multracks_QQ Plotting percent_lfa.MLM 
+Multracks_QQ Plotting percent_lfa.FarmCPU 
+Multraits_QQ Plotting percent_lfa.GLM 
+Multraits_QQ Plotting percent_lfa.MLM 
+Multraits_QQ Plotting percent_lfa.FarmCPU 
+Results are stored at Working Directory: rMVP_results 
+End: 2024-04-17 09:38:23 
+===================== MVP ACCOMPLISHED ===================== 
+Rectangular_Manhattan Plotting percent_lfa.GLM 
+Rectangular_Manhattan Plotting percent_lfa.MLM 
+Rectangular_Manhattan Plotting percent_lfa.FarmCPU 

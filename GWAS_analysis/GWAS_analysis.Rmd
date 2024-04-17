@@ -283,6 +283,7 @@ knitr::include_graphics(here("figs", "Rstudio_export_screenshot.png"))
 
 ### Online Books, Tutorials and Blogs
 
+* **Mapping Tutorial** -- An [excellent tutorial](https://bookdown.org/jrodriguez36/PGRP-Mapping-Workshop/) that covers similar topics to this workshop by Jonas Rodriguez (University of Wisconsin)
 * **SNP filtering tutorial** -- Learn the principles behind proper filtering [link](https://www.ddocent.com/filtering/){target="_blank"}  
 * **SNPfiltR** -- An R package for VCF file filtering and QC in R [GitHub repository](https://github.com/DevonDeRaad/SNPfiltR){target="_blank"}
 * **Population genetics and genomics in R** -- A great tutorial from the creators of `vcfR` package [online tutorial](https://grunwaldlab.github.io/Population_Genetics_in_R/index.html){target="_blank"}
